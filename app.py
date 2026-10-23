@@ -76,7 +76,7 @@ def call_commercial_llm(prompt):
     )
     return response.choices[0].message.content
     def call_local_ollama(prompt):
-    return call_commercial_llm(prompt)
+        return call_commercial_llm(prompt)
 
 def call_local_ollama(prompt):
     # This catches any accidental local calls and reroutes them to the cloud
