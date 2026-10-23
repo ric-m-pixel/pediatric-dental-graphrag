@@ -69,7 +69,7 @@ vignettes = [
 
 def call_commercial_llm(prompt):
     # This securely pulls the key you pasted into Streamlit Secrets
-    client = Groq(api_key=st.secrets["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"])
+    client = Groq(api_key=st.secrets["client = Groq(api_key=st.secrets["GROQ_API_KEY"])"])
     response = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.1-8b-instant", 
