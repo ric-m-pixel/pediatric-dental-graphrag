@@ -1,3 +1,5 @@
+import streamlit as st
+from groq import Groq
 import json
 import random
 import csv
@@ -64,39 +66,21 @@ vignettes = [
     }
 ]
 
-def call_local_ollama(prompt):
-    req_data = json.dumps({
-        "model": LOCAL_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "stream": False
-    }).encode("utf-8")
-
-    req = urllib.request.Request(
-        OLLAMA_ENDPOINT,
-        data=req_data,
-        headers={"Content-Type": "application/json"}
-    )
-    with urllib.request.urlopen(req, timeout=300) as response:
-        res = json.loads(response.read().decode("utf-8"))
-        return res["message"]["content"]
 
 def call_commercial_llm(prompt):
-    """Calls Gemini API as commercial control, with local model fallback if key is missing."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if HAS_GEMINI_SDK and api_key:
-        try:
-            client = genai.Client(api_key=api_key)
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
-            return response.text
-        except Exception as e:
-            print(f"⚠️ Gemini API call failed: {e}. Using local model simulation.")
-    
-    # Fallback simulation representing unguided cloud LLM response
-    fallback_prompt = f"[Commercial Cloud LLM Control Simulation]\n{prompt}"
-    return call_local_ollama(fallback_prompt)
+    # This securely pulls the key you pasted into Streamlit Secrets
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model="llama3-8b-8192", 
+    )
+    return response.choices[0].message.content
+    def call_local_ollama(prompt):
+    return call_commercial_llm(prompt)
+
+def call_local_ollama(prompt):
+    # This catches any accidental local calls and reroutes them to the cloud
+    return call_commercial_llm(prompt)
 
 def query_neo4j_rules(driver, procedure_name):
     query = """
